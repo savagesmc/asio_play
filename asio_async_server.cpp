@@ -19,12 +19,12 @@ private:
 
 public:
   typedef boost::shared_ptr<con_handler> pointer;
-  con_handler(boost::asio::io_service& io_service): sock(io_service){}
+  con_handler(boost::asio::io_context& io_context): sock(io_context){}
 
   // creating the pointer
-  static pointer create(boost::asio::io_service& io_service)
+  static pointer create(boost::asio::io_context& io_context)
   {
-    return pointer(new con_handler(io_service));
+    return pointer(new con_handler(io_context));
   }
 
   //socket creation
@@ -73,12 +73,13 @@ public:
 class Server 
 {
 private:
+   ba::io_context& io_context_;
    tcp::acceptor acceptor_;
 
    void start_accept()
    {
     // socket
-     con_handler::pointer connection = con_handler::create(acceptor_.get_io_service());
+     con_handler::pointer connection = con_handler::create(io_context_);
 
     // asynchronous accept operation and wait for a new connection.
      acceptor_.async_accept(connection->socket(),
@@ -89,7 +90,9 @@ private:
 public:
 
   //constructor for accepting connection from client
-  Server(boost::asio::io_service& io_service): acceptor_(io_service, tcp::endpoint(tcp::v4(), 1234))
+  Server(boost::asio::io_context& io_context)
+  : io_context_(io_context)
+  , acceptor_(io_context_, tcp::endpoint(tcp::v4(), 1234))
   {
      start_accept();
   }
@@ -108,9 +111,9 @@ int main(int argc, char *argv[])
 {
   try
   {
-    boost::asio::io_service io_service;  
-    Server server(io_service);
-    io_service.run();
+    boost::asio::io_context io_context;  
+    Server server(io_context);
+    io_context.run();
   }
   catch(std::exception& e)
   {
