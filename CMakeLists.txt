@@ -23,6 +23,7 @@ set(APPS
   asio_test_client
   asio_test_server
   asio_thread_pool_example
+  asio_thread_pool_example2
 )
 
 set(LIBS 
