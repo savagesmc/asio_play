@@ -5,13 +5,18 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include <mutex>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 namespace ba = boost::asio;
 
+// Thread pool size
+const int numThreads = 2;
 mutex global_stream_lock;
 
-void doWork(shared_ptr<ba::io_context> io_context) {
+void doWork(shared_ptr<ba::io_context> io_context)
+{
    global_stream_lock.lock();
    std::cout << "[" << this_thread::get_id() << "] Thread Start" << endl;
    global_stream_lock.unlock();
@@ -23,7 +28,34 @@ void doWork(shared_ptr<ba::io_context> io_context) {
    global_stream_lock.unlock();
 }
 
-int main( int argc, char * argv[] ) {
+size_t fib(size_t n)
+{
+   if (n <= 1)
+   {
+      return n;
+   }
+   this_thread::sleep_for(milliseconds(1000));
+   return fib(n - 1) + fib(n - 2);
+}
+
+void CalculateFib(size_t n)
+{
+   global_stream_lock.lock();
+   std::cout << "[" << this_thread::get_id()
+             << "] Now calculating fib( " << n << " ) " << std::endl;
+   global_stream_lock.unlock();
+
+   size_t f = fib(n);
+
+   global_stream_lock.lock();
+   std::cout << "[" << this_thread::get_id()
+             << "] fib( " << n << " ) = " << f << std::endl;
+
+   global_stream_lock.unlock();
+}
+
+int main(int argc, char *argv[])
+{
    auto io_context = make_shared<ba::io_context>();
    auto work = make_shared<ba::io_context::work>(*io_context);
 
@@ -32,16 +64,21 @@ int main( int argc, char * argv[] ) {
    global_stream_lock.unlock();
 
    vector<thread> threadPool;
-   for( int x = 0; x < 4; ++x ) {
+   for (int x = 0; x < numThreads; ++x)
+   {
       threadPool.emplace_back(bind(doWork, io_context));
    }
 
-   std::cin.get();
+   io_context->post(bind(CalculateFib, 3));
+   io_context->post(bind(CalculateFib, 4));
+   io_context->post(bind(CalculateFib, 5));
 
-   io_context->stop();
+   work.reset();
 
-   for (auto& thread : threadPool) {
-      if (thread.joinable()) {
+   for (auto &thread : threadPool)
+   {
+      if (thread.joinable())
+      {
          thread.join();
       }
    }
