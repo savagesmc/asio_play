@@ -25,6 +25,7 @@ set(APPS
   asio_thread_pool_example
   asio_exception_example
   deadline_timer_example
+  recurring_timer_example
 )
 
 set(LIBS 
