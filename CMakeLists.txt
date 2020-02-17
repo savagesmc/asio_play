@@ -27,6 +27,8 @@ set(APPS
   deadline_timer_example
   recurring_timer_example
   tcp_socket_example
+  async_tcp_connect_example
+  async_server_accept_example
 )
 
 set(LIBS 
