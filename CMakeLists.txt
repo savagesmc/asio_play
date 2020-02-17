@@ -23,7 +23,8 @@ set(APPS
   asio_test_client
   asio_test_server
   asio_thread_pool_example
-  asio_thread_pool_example2
+  asio_exception_example
+  deadline_timer_example
 )
 
 set(LIBS 
