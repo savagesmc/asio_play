@@ -145,6 +145,8 @@ void Run3(shared_ptr<ba::io_context> io_context)
    }
 }
 
+// NOTE: No mutex lock here - so if multiple threads are 
+// calling this at the same time, can get mixed up output
 void PrintNum(int x)
 {
    std::cout << "[" << this_thread::get_id()
@@ -177,7 +179,7 @@ int main(int argc, char *argv[])
    }
    else if (example == 2)
    {
-      cout << "post test (ordering)" << endl;
+      cout << "post test (no enforced ordering, and thread exclusion)" << endl;
       ThreadPool pool(3); // 3 threads
       pool.post(bind(PrintNum, 1));
       pool.post(bind(PrintNum, 2));
@@ -188,19 +190,14 @@ int main(int argc, char *argv[])
    }
    else if (example == 3)
    {
-      cout << "post + strand test (strands are ordered)" << endl;
+      cout << "strand test (strands are ordered - and no thread contention)" << endl;
       ThreadPool pool(3); // 3 threads
       auto strand = pool.get_strand();
-      pool.post(bind(PrintNum, 1));
-      strand->post(bind(PrintNum, 6));
-      pool.post(bind(PrintNum, 2));
-      strand->post(bind(PrintNum, 7));
-      pool.post(bind(PrintNum, 3));
-      strand->post(bind(PrintNum, 8));
-      pool.post(bind(PrintNum, 4));
-      strand->post(bind(PrintNum, 9));
-      pool.post(bind(PrintNum, 5));
-      strand->post(bind(PrintNum, 10));
+      strand->post(bind(PrintNum, 1));
+      strand->post(bind(PrintNum, 2));
+      strand->post(bind(PrintNum, 3));
+      strand->post(bind(PrintNum, 4));
+      strand->post(bind(PrintNum, 5));
       pool.reset();
    }
 
