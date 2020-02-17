@@ -11,7 +11,7 @@ using namespace std;
 using namespace std::chrono;
 namespace ba = boost::asio;
 
-typedef std::lock_guard<mutex> Guard;
+typedef lock_guard<mutex> Guard;
 
 // Thread pool size
 const int numThreads = 1;
@@ -20,14 +20,14 @@ mutex global_stream_lock;
 void doWork(shared_ptr<ba::io_context> io_context)
 {
    {
-      Guard locked(mutex);
+      Guard locked(global_stream_lock);
       std::cout << "[" << this_thread::get_id() << "] Thread Start" << endl;
    }
 
    io_context->run();
 
    {
-      Guard locked(mutex);
+      Guard locked(global_stream_lock);
       std::cout << "[" << this_thread::get_id() << "] Thread Stop" << endl;
    }
 }
@@ -35,7 +35,7 @@ void doWork(shared_ptr<ba::io_context> io_context)
 void Dispatch(int x)
 {
    {
-      Guard locked(mutex);
+      Guard locked(global_stream_lock);
       std::cout << "[" << this_thread::get_id() << "] "
                << __FUNCTION__ << " x = " << x << std::endl;
    }
@@ -44,7 +44,7 @@ void Dispatch(int x)
 void Post(int x)
 {
    {
-      Guard locked(mutex);
+      Guard locked(global_stream_lock);
       std::cout << "[" << this_thread::get_id() << "] "
                << __FUNCTION__ << " x = " << x << std::endl;
    }
@@ -73,7 +73,7 @@ size_t fib(size_t n)
 void CalculateFib(size_t n)
 {
    {
-      Guard locked(mutex);
+      Guard locked(global_stream_lock);
       std::cout << "[" << this_thread::get_id()
                << "] Now calculating fib( " << n << " ) " << std::endl;
    }
@@ -81,7 +81,7 @@ void CalculateFib(size_t n)
    size_t f = fib(n);
 
    {
-      Guard locked(mutex);
+      Guard locked(global_stream_lock);
       std::cout << "[" << this_thread::get_id()
                << "] fib( " << n << " ) = " << f << std::endl;
    }
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
    auto work = make_shared<ba::io_context::work>(*io_context);
 
    {
-      Guard locked(mutex);
+      Guard locked(global_stream_lock);
       std::cout << "Press [return] to exit." << std::endl;
    }
 
