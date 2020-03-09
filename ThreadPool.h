@@ -113,7 +113,7 @@ private:
          }
          catch (const std::exception& e)
          {
-            std::cerr << "ThreadPool::exception - " << e.what() << "\n";
+            std::cerr << "ThreadPool::worker:exception - " << e.what() << "\n";
          }
          if (!playThrough_)
          {

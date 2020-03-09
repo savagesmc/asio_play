@@ -84,7 +84,7 @@ void PrintNum(int x)
 int main(int argc, char *argv[])
 {
    int example = 0;
-   if (argc>=1)
+   if (argc > 1)
    {
       example = atoi(argv[1]);
    }

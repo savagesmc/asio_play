@@ -12,7 +12,11 @@
                 "-G",
                 "'Ninja'",
                 "${workspaceRoot}"
-            ]
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "build",
@@ -21,11 +25,8 @@
                 "cwd": "${workspaceRoot}/build"
             },
             "command": "ninja",
-            "args": [ ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "args": [],
+            "group": "build",
             "problemMatcher": [
                 "$gcc"
             ]
